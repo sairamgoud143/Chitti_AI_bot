@@ -2,5 +2,6 @@ speechrecognition
 requests
 yt-dlp
 joblib
-spacy
-gradio
+spacy==3.7.2
+gradio==4.44.1
+scikit-learn
