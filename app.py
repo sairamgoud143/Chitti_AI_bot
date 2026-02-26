@@ -106,11 +106,7 @@ def recognition(audio):
     except Exception:
         return 'Your Voice is not Recognized by Chitti'
 
-try:
-    nlp = spacy.load('en_core_web_sm')
-except OSError:
-    spacy.cli.download('en_core_web_sm')
-    nlp = spacy.load('en_core_web_sm')
+nlp = spacy.load('en_core_web_sm')
 
 def extract_website(sentence):
     doc = nlp(sentence.lower())
@@ -222,3 +218,4 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
 
 port = int(os.environ.get('PORT',7860))
 demo.launch(server_name = '0.0.0.0',server_port = port)
+
