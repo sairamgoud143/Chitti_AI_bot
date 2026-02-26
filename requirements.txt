@@ -1,0 +1,6 @@
+speechrecognition
+requests
+yt-dlp
+joblib
+spacy
+gradio
