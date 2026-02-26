@@ -7,6 +7,7 @@ import joblib
 import spacy
 import re
 import gradio as gr
+import os
 
 PASSWORD = 'Sairam@970#'
 def verify_password(pswd):
@@ -106,10 +107,10 @@ def recognition(audio):
         return 'Your Voice is not Recognized by Chitti'
 
 try:
-    nlp = spacy.load('en_core_web_md')
+    nlp = spacy.load('en_core_web_sm')
 except OSError:
-    spacy.cli.download('en_core_web_md')
-    nlp = spacy.load('en_core_web_md')
+    spacy.cli.download('en_core_web_sm')
+    nlp = spacy.load('en_core_web_sm')
 
 def extract_website(sentence):
     doc = nlp(sentence.lower())
@@ -124,8 +125,6 @@ def extract_website(sentence):
         if i.pos_ in ['NOUN','PROPN']:
             return i.text.lower()
     return None
-
-model = joblib.load('intent_based_model.pkl')
 
 def model_activation(message,history,state,audio):
     if audio is None:
@@ -220,4 +219,6 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
                        inputs = [audio,state],
                        outputs = [chatbot_box,state,music_player])
     
-demo.launch(share=True)
+
+port = int(os.environ.get('PORT',7860))
+demo.launch(server_name = '0.0.0.0',server_port = port)
