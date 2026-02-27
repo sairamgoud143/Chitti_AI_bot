@@ -205,8 +205,7 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
         visible = False
     )
     video_player = gr.Video(label= 'Now Playing.....',visible=False)
-    msg = gr.Textbox(
-                     Wake Up The Chitti with the Code Word !''',visible=False)
+    msg = gr.Textbox('Wake Up The Chitti with the Code Word !',visible=False)
     progress_box = gr.Textbox(
         label = 'Download Status',
         interactive = False,
@@ -230,6 +229,7 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
 port = int(os.environ.get('PORT',7860))
 demo.launch(server_name = '0.0.0.0',
             server_port = port)
+
 
 
 
