@@ -41,17 +41,12 @@ def playing_music_download(song_name,progress=gr.Progress()):
             percent = d.get('_percent_str','0%')
             progress(percent.strip())
     options = {
-        'format':'bestvideo+bestaudio/best',
+        'format':'best[ext=mp4]/best',
         'quiet':True,
         'default_search':'ytsearch1',
         'outtmpl': '%(title)s.%(ext)s',
-        'compat_opts':['js-runtime'],
         'noplaylist':True,
         'progress_hooks':[progress_hook],
-        'postprocessors':[{
-            'key':'FFmpegVideoConvertor',
-            'preferedformat':'mp4'
-        }],
     }
     
     try:
@@ -128,7 +123,7 @@ def model_activation(history,state,audio,code_text):
     response = 'speak.......How can i help you ?'
     history.append({'role':'user','content':user})
     history.append({'role':'assistant','content':response})
-    return history,gr.update(value=None,visible=True),history,gr.update(interactive=True),gr.update(visible=False),gr.update(visible=False)
+    return history,gr.update(value=None,visible=True),history.copy(),gr.update(interactive=True),gr.update(visible=False),gr.update(visible=False),gr.update(visible=True)
 
 try:
     model = joblib.load('intent_based_model.pkl')
@@ -171,6 +166,8 @@ def command_processing(audio1,history,command_text):
             'Chitti: Here is the latest news for you......\n\n'
             + '\n'.join(headlines[:20])
             ) if headlines else 'Chitti: No News Found !'
+        histroy.append({'role':'assistant','content':response})
+        return history, history.copy(), gr.update(value=file_path, visible=True),gr.update(value=None)
     elif intent == 'website':
         site = extract_website(command)
         if site:
@@ -218,7 +215,7 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
                     outputs = [chatbot_box,msg,auth_message,audio,send_audio,code_text])
     send_audio.click(model_activation,
                  inputs = [chatbot_box,state,audio,code_text],
-                 outputs = [chatbot_box,audio,state,send_command,send_audio,code_text])
+                 outputs = [chatbot_box,audio,state,send_command,send_audio,code_text,command_text])
     send_command.click(command_processing,
                        inputs = [audio,state,command_text],
                        outputs = [chatbot_box,state,video_player,audio])
@@ -227,6 +224,7 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
 port = int(os.environ.get('PORT',7860))
 demo.launch(server_name = '0.0.0.0',
             server_port = port)
+
 
 
 
