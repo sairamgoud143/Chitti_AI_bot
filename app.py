@@ -119,7 +119,7 @@ def model_activation(message,history,state,audio,code_text):
     if not user:
         history.append({'role':'assistant',
                         'content':'Code word is needed to activate Chitti....'})
-        return history,gr.update(value=None),history,gr.update(interactive=False)
+        return history,gr.update(value=None),history,gr.update(interactive=False),gr.update(),gr.update()
     if 'chitti' not in user:
         warning = 'Warning: The Chitti cannot be activated without the Code Word'
         history.append({"role": "assistant", "content": warning})
@@ -128,7 +128,7 @@ def model_activation(message,history,state,audio,code_text):
     response = 'speak.......How can i help you ?'
     history.append({'role':'user','content':user})
     history.append({'role':'assistant','content':response})
-    return history,gr.update(value=None,visible=False),history,gr.update(interactive=True),gr.update(visible=False),gr.update(visible=False),gr.update(visible=True)
+    return history,gr.update(value=None,visible=False),history,gr.update(interactive=True),gr.update(visible=False),gr.update(visible=False)
 
 try:
     model = joblib.load('intent_based_model.pkl')
@@ -149,9 +149,10 @@ def command_processing(audio1,history,command_text):
     if audio1 is None:
         history.append({'role':'assistant',
                         'content':'No audio was detected, please record your command'})
-        return history,history,gr.update(value=file_path,visible=True)
+        return history,history,gr.update(visible=False)
     if command_text and command_text.strip() != '':
         command = command_text.lower()
+        intent = model.predict([command])[0] if model else 'Unknown'
     else:
         intent,command = find_intent(audio1)
     if not command:
@@ -204,8 +205,8 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
         visible = False
     )
     video_player = gr.Video(label= 'Now Playing.....',visible=False)
-    msg = gr.Textbox(label = '''Initialising Chitti..........\n
-                     Wake Up The Chitti with the Code Word !''',visible=True)
+    msg = gr.Textbox(
+                     Wake Up The Chitti with the Code Word !''',visible=False)
     progress_box = gr.Textbox(
         label = 'Download Status',
         interactive = False,
@@ -220,7 +221,7 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
                     outputs = [chatbot_box,msg,auth_message,audio,send_audio,code_text])
     send_audio.click(model_activation,
                  inputs = [msg,chatbot_box,state,audio,code_text],
-                 outputs = [chatbot_box,audio,state,send_command,code_text])
+                 outputs = [chatbot_box,audio,state,send_command,send_audio,code_text])
     send_command.click(command_processing,
                        inputs = [audio,state,command_text],
                        outputs = [chatbot_box,state,video_player])
@@ -229,6 +230,7 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
 port = int(os.environ.get('PORT',7860))
 demo.launch(server_name = '0.0.0.0',
             server_port = port)
+
 
 
 
