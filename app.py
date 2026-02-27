@@ -106,11 +106,16 @@ def recognition(audio):
     except Exception:
         return 'Your Voice is not Recognized by Chitti'
 
-nlp = pipeline('ner',model = 'dslim/bert-base-NER',grouped_entities = True)
+def get_ner():
+    global nlp
+    if nlp is None:
+        nlp = pipeline('ner',model="dslim/bert-base-NER",grouped_entities=True)
+    return nlp
 
 def extract_website(sentence):
     doc = sentence.lower()
-    entities = nlp(doc)
+    ner = get_ner()
+    entities = ner(doc)
     for i in entities:
         if i['entity_group'] in ['ORG','MISC']:
             site = i['word'].lower()
@@ -149,13 +154,18 @@ def model_activation(message,history,state,audio):
     history.append({'role':'assistant','content':response})
     return history,gr.update(value=None),history,gr.update(interactive=True)
 
-model = joblib.load('intent_based_model.pkl')
+try:
+    model = joblib.load('intent_based_model.pkl')
+except Exception as e:
+    print('Model Loading Failed:',e)
+    model = None
+    
 def find_intent(audio1):
     command = recognition(audio1)
     if not command:
         return 'Unknown',''
     command = command.lower()
-    intent = model.predict([command])[0] if command.strip() else 'Unknown'
+    intent = model.predict([command])[0] if model else 'Unknown'
     return intent,command
 
 def command_processing(audio1,history):
@@ -224,6 +234,7 @@ demo.launch(server_name = '0.0.0.0',
             server_port = port,
            share = False,
            debug = False)
+
 
 
 
