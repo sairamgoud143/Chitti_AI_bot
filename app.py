@@ -4,7 +4,6 @@ import requests
 import yt_dlp
 import time
 import joblib
-import spacy
 import re
 import gradio as gr
 import os
@@ -222,5 +221,6 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
 
 port = int(os.environ.get('PORT',7860))
 demo.launch(server_name = '0.0.0.0',server_port = port)
+
 
 
