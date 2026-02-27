@@ -11,9 +11,21 @@ import os
 PASSWORD = 'Sairam@970#'
 def verify_password(pswd):
     if pswd == PASSWORD:
-        return [],[],'Access Granted !'
+        return(
+            gr.update(visible=True),
+            gr.update(visible=True),
+            'Access Granted !',
+            gr.update(visible=True),
+            gr.update(visible=True),
+        )
     else:
-        return [],[],'Invalid Credentials ! Please Login with correct credentials'
+        return(
+            gr.update(visible=False),
+            gr.update(visible=False),
+            'Invalid Credentials ! Please Login with correct credentials',
+            gr.update(visible=False),
+            gr.update(visible=False),
+        )
 
 def open_website(link):
     op.open(link)
@@ -160,13 +172,14 @@ def find_intent(audio1):
     return intent,command
 
 def command_processing(audio1,history):
+    file_path = None
     if audio1 is None:
         history.append({'role':'assistant',
                         'content':'No audio was detected, please record your command'})
-        return history,history
+        return history,history,file_path
     intent,command = find_intent(audio1)
     if not command:
-        return history,history
+        return history,history,file_path
     if intent == 'music':
         file_path = playing_music_download(command)
         response = 'Chitti: I will play the song for you...\nChitti: if you want to download just say true otherwise false'
@@ -188,7 +201,7 @@ def command_processing(audio1,history):
             response = 'Chitti: Sorry, i could not understand this.....'
     history.append({'role':'user','content':command})
     history.append({'role':'assistant','content':response})
-    return history,history
+    return history,history,file_path
 
 with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
     gr.Markdown("""
@@ -200,18 +213,17 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
         """)
     password = gr.Textbox(label='Password',type='password',placeholder='Enter Your Password')
     auth_message = gr.Textbox(label='Status',interactive=False)
-    chatbot_box = gr.Chatbot()
-    music_player = gr.Audio(label= 'Now Playing.....',interactive=False)
+    chatbot_box = gr.Chatbot(visible=False)
+    music_player = gr.Audio(label= 'Now Playing.....',interactive=False,visible=False)
     msg = gr.Textbox(label = '''Initialising Chitti..........\n
                      Wake Up The Chitti with the Code Word !''',visible=True)
     state = gr.State([])
+    audio = gr.Audio(sources='microphone',type='filepath',visible=False)
+    send_audio = gr.Button('Send CODE WORD!',visible=False)
+    send_command = gr.Button('Send Command',interactive=False)
     password.submit(verify_password,
                     inputs = password,
-                    outputs = [chatbot_box,msg,auth_message])
-    
-    audio = gr.Audio(sources='microphone',type='filepath')
-    send_audio = gr.Button('Send CODE WORD!')
-    send_command = gr.Button('Send Command',interactive=False)
+                    outputs = [chatbot_box,msg,auth_message,audio,send_audio])
     send_audio.click(model_activation,
                  inputs = [msg,chatbot_box,state,audio],
                  outputs = [chatbot_box,audio,state,send_command])
@@ -222,9 +234,8 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
 
 port = int(os.environ.get('PORT',7860))
 demo.launch(server_name = '0.0.0.0',
-            server_port = port,
-           share = False,
-           debug = False)
+            server_port = port)
+
 
 
 
