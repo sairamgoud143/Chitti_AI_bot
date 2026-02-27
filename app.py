@@ -17,12 +17,14 @@ def verify_password(pswd):
             'Access Granted !',
             gr.update(visible=True),
             gr.update(visible=True),
+            gr.update(visible=True),
         )
     else:
         return(
             gr.update(visible=False),
             gr.update(visible=False),
             'Invalid Credentials ! Please Login with correct credentials',
+            gr.update(visible=False),
             gr.update(visible=False),
             gr.update(visible=False),
         )
@@ -133,16 +135,14 @@ def extract_website(sentence):
             return i
     return None
 
-def model_activation(message,history,state,audio):
-    if audio is None:
-        history.append({
-            'role':'assistant',
-            'content':'No audio detected. Please say the code word.'
-        })
-        return history, gr.update(value=None), history,gr.update(interactive=True)
-    user = recognition(audio)
-    if user:
-        user = user.lower()
+def model_activation(message,history,state,audio,code_text):
+    user = None
+    if code_text and code_text.strip() != '':
+        user = code_text.lower()
+    elif audio is not None:
+        user = recognition(audio)
+        if user:
+            user = user.lower()
     if not user:
         history.append({'role':'assistant',
                         'content':'Code word is needed to activate Chitti....'})
@@ -176,16 +176,16 @@ def command_processing(audio1,history):
     if audio1 is None:
         history.append({'role':'assistant',
                         'content':'No audio was detected, please record your command'})
-        return history,history,file_path
+        return history,history,gr.update(value=file_path,visible=True)
     intent,command = find_intent(audio1)
     if not command:
-        return history,history,file_path
+        return history,history,gr.update(value=file_path,visible=True)
     if intent == 'music':
         file_path = playing_music_download(command)
         response = 'Chitti: I will play the song for you...\nChitti: if you want to download just say true otherwise false'
         history.append({'role':'user','content':command})
         history.append({'role':'assistant','content':response})
-        return history,history,file_path
+        return history,history,gr.update(value=file_path,visible=True)
     elif intent == 'news':
         headlines = fetching_news()
         response = (
@@ -201,7 +201,7 @@ def command_processing(audio1,history):
             response = 'Chitti: Sorry, i could not understand this.....'
     history.append({'role':'user','content':command})
     history.append({'role':'assistant','content':response})
-    return history,history,file_path
+    return history,history,gr.update(value=file_path,visible=True)
 
 with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
     gr.Markdown("""
@@ -214,7 +214,11 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
     password = gr.Textbox(label='Password',type='password',placeholder='Enter Your Password')
     auth_message = gr.Textbox(label='Status',interactive=False)
     chatbot_box = gr.Chatbot(visible=False)
-    music_player = gr.Audio(label= 'Now Playing.....',interactive=False,visible=False)
+    code_text = gr.TextBox(
+        label = 'Or Type Code Word Here',
+        placeholder = "Type 'chitti' to activate......",
+        visible = False)
+    video_player = gr.Video(label= 'Now Playing.....',visible=False)
     msg = gr.Textbox(label = '''Initialising Chitti..........\n
                      Wake Up The Chitti with the Code Word !''',visible=True)
     state = gr.State([])
@@ -223,18 +227,19 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
     send_command = gr.Button('Send Command',interactive=False)
     password.submit(verify_password,
                     inputs = password,
-                    outputs = [chatbot_box,msg,auth_message,audio,send_audio])
+                    outputs = [chatbot_box,msg,auth_message,audio,send_audio,code_text])
     send_audio.click(model_activation,
-                 inputs = [msg,chatbot_box,state,audio],
+                 inputs = [msg,chatbot_box,state,audio,code_text],
                  outputs = [chatbot_box,audio,state,send_command])
     send_command.click(command_processing,
                        inputs = [audio,state],
-                       outputs = [chatbot_box,state,music_player])
+                       outputs = [chatbot_box,state,video_player])
     
 
 port = int(os.environ.get('PORT',7860))
 demo.launch(server_name = '0.0.0.0',
             server_port = port)
+
 
 
 
