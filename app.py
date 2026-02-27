@@ -106,6 +106,7 @@ def recognition(audio):
     except Exception:
         return 'Your Voice is not Recognized by Chitti'
 
+nlp = None
 def get_ner():
     global nlp
     if nlp is None:
@@ -234,6 +235,7 @@ demo.launch(server_name = '0.0.0.0',
             server_port = port,
            share = False,
            debug = False)
+
 
 
 
