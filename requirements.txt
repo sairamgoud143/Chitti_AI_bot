@@ -4,6 +4,4 @@ yt-dlp
 joblib
 scikit-learn
 gradio
-huggingface_hub
-transformers
 torch
