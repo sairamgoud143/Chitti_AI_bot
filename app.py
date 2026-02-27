@@ -7,7 +7,6 @@ import joblib
 import re
 import gradio as gr
 import os
-from transformers import pipeline
 
 PASSWORD = 'Sairam@970#'
 def verify_password(pswd):
@@ -106,21 +105,12 @@ def recognition(audio):
     except Exception:
         return 'Your Voice is not Recognized by Chitti'
 
-nlp = None
-def get_ner():
-    global nlp
-    if nlp is None:
-        nlp = pipeline('ner',model="dslim/bert-base-NER",grouped_entities=True)
-    return nlp
-
 def extract_website(sentence):
     doc = sentence.lower()
-    ner = get_ner()
-    entities = ner(doc)
-    for i in entities:
-        if i['entity_group'] in ['ORG','MISC']:
-            site = i['word'].lower()
-            return site
+    site_pattern = r"(https?://\S+|www\.\S+|\w+\.(com|in|org|net|io))"
+    match = re.search(site_pattern,doc)
+    if match:
+        return match.group(0)
     verb_pattern = r'(open|visit|search|go to|launch)\s+(\w+)'
     match = re.search(verb_pattern,doc)
     if match:
@@ -235,6 +225,7 @@ demo.launch(server_name = '0.0.0.0',
             server_port = port,
            share = False,
            debug = False)
+
 
 
 
