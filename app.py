@@ -37,7 +37,7 @@ def sanitize_filename(name):
 
 def playing_music_download(song_name,progress=gr.Progress()):
     def progress_hook(d):
-        if d['status'] == 'downloading':,
+        if d['status'] == 'downloading':
             percent = d.get('_percent_str','0%')
             progress(percent.strip())
     options = {
@@ -229,6 +229,7 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
 port = int(os.environ.get('PORT',7860))
 demo.launch(server_name = '0.0.0.0',
             server_port = port)
+
 
 
 
