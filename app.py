@@ -214,7 +214,7 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
     password = gr.Textbox(label='Password',type='password',placeholder='Enter Your Password')
     auth_message = gr.Textbox(label='Status',interactive=False)
     chatbot_box = gr.Chatbot(visible=False)
-    code_text = gr.TextBox(
+    code_text = gr.Textbox(
         label = 'Or Type Code Word Here',
         placeholder = "Type 'chitti' to activate......",
         visible = False)
@@ -239,6 +239,7 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
 port = int(os.environ.get('PORT',7860))
 demo.launch(server_name = '0.0.0.0',
             server_port = port)
+
 
 
 
