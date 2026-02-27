@@ -47,7 +47,7 @@ def playing_music_download(song_name,progress=gr.Progress()):
         'outtmpl': '%(title)s.%(ext)s',
         'compat_opts':['js-runtime'],
         'noplaylist':True,
-        'progress_hooks:[progress_hook],
+        'progress_hooks':[progress_hook],
         'postprocessors':[{
             'key':'FFmpegVideoConvertor',
             'preferedformat':'mp4'
@@ -229,6 +229,7 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
 port = int(os.environ.get('PORT',7860))
 demo.launch(server_name = '0.0.0.0',
             server_port = port)
+
 
 
 
