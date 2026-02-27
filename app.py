@@ -8,6 +8,7 @@ import spacy
 import re
 import gradio as gr
 import os
+from transformers import pipeline
 
 PASSWORD = 'Sairam@970#'
 def verify_password(pswd):
@@ -106,20 +107,23 @@ def recognition(audio):
     except Exception:
         return 'Your Voice is not Recognized by Chitti'
 
-nlp = spacy.load('en_core_web_sm')
+nlp = pipeline('ner',model = 'dslim/bert-base-NER',grouped_entities = True)
 
 def extract_website(sentence):
-    doc = nlp(sentence.lower())
-    for i in doc.ents:
-        if i.label_ in ['ORG','PRODUCT']:
-            site = i.text.lower()
+    doc = sentence.lower()
+    entities = nlp(doc)
+    for i in entities:
+        if i['entity_group'] in ['ORG','MISC']:
+            site = i['word'].lower()
             return site
-    for i in doc:
-        if i.dep_ in ('dobj','obj') and i.head.pos_ == 'VERB':
-            return i.text.lower()
-    for i in doc:
-        if i.pos_ in ['NOUN','PROPN']:
-            return i.text.lower()
+    verb_pattern = r'(open|visit|search|go to|launch)\s+(\w+)'
+    match = re.search(verb_pattern,doc)
+    if match:
+        return match.group(2)
+    words = doc.split()
+    for i in words:
+        if i.isalpha() and len(i)>2:
+            return i
     return None
 
 def model_activation(message,history,state,audio):
@@ -218,4 +222,5 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
 
 port = int(os.environ.get('PORT',7860))
 demo.launch(server_name = '0.0.0.0',server_port = port)
+
 
