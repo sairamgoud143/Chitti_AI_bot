@@ -220,7 +220,11 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
     
 
 port = int(os.environ.get('PORT',7860))
-demo.launch(server_name = '0.0.0.0',server_port = port)
+demo.launch(server_name = '0.0.0.0',
+            server_port = port,
+           share = False,
+           debug = False)
+
 
 
 
