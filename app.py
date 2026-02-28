@@ -32,19 +32,8 @@ def verify_password(pswd):
         )
 
 def get_youtube(song_name):
-    options = {
-        'quiet':True,
-        'default_search':'ytsearch1',
-        'noplaylist':True
-    }
-    with yt_dlp.YoutubeDL(options) as ydl:
-        info = ydl.extract_info(song_name,download=True)
-        entry = info['entries'][0] if 'entries' in info else info
-        return entry ['webpage_url']
-        
-def extract_id(url):
-    match = re.search(r'(?:v=|youtu\.be/)([^&]+)', url)
-    return match.group(1) if match else None
+    query = song_name.replace(' ','+')
+    return f"https://www.youtube.com/results?search_query={query}"
   
 def fetching_news():
     api_key = '904716fee400b0ccd9210e82f10353fb'
@@ -139,16 +128,13 @@ def command_processing(audio1,history,command_text):
         history.append({'role':'user','content':command})
         history.append({'role':'assistant','content':'Downloading Video.....Please Wait..'})
         try:
-            url = get_youtube(command)
-            id = extract_id(url)
+            search_url = get_youtube(command)
             embed_html = f"""
-        <iframe width="100%" height="400"
-        src="https://www.youtube.com/embed/{video_id}?autoplay=1"
-        frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-        </iframe>
-        """
+            <iframe width="100%" height="500"
+            src="{search_url}"
+            frameborder="0">
+            </iframe>
+            """
             history.append({'role':'assistant','content':'Playing Your Song Below.....'})
             return history,history.copy(),gr.update(value=embed_html,visible=True),gr.update(value=None),gr.update(interactive=True),gr.update(),gr.update()
         except Exception as e:
@@ -219,6 +205,7 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
 port = int(os.environ.get('PORT',7860))
 demo.launch(server_name = '0.0.0.0',
             server_port = port)
+
 
 
 
