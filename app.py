@@ -120,7 +120,7 @@ def model_activation(history,audio,code_text):
     response = 'speak.......How can i help you ?'
     history.append({'role':'user','content':user})
     history.append({'role':'assistant','content':response})
-    return history,gr.update(value=None),history.copy(),gr.update(interactive=True),gr.update(visible=False),gr.update(visible=False),gr.update(visible=True)
+    return history,gr.update(value=None),history.copy(),gr.update(interactive=True,visible=True),gr.update(visible=False),gr.update(visible=False),gr.update(visible=True)
 
 try:
     model = joblib.load('intent_based_model.pkl')
@@ -221,6 +221,7 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
 port = int(os.environ.get('PORT',7860))
 demo.launch(server_name = '0.0.0.0',
             server_port = port)
+
 
 
 
