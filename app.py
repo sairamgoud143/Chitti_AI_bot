@@ -29,9 +29,6 @@ def verify_password(pswd):
             gr.update(visible=False),
         )
 
-def open_website(link):
-    op.open(link)
-
 def playing_music_download(song_name,progress=gr.Progress()):
     def progress_hook(d):
         if d['status'] == 'downloading':
@@ -100,7 +97,7 @@ def extract_website(sentence):
             return f'http://www.{i}.com'
     return None
 
-def model_activation(history,state,audio,code_text):
+def model_activation(history,audio,code_text):
     user = None
     if code_text and code_text.strip() != '':
         user = code_text.lower()
@@ -186,7 +183,7 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
         """)
     password = gr.Textbox(label='Password',type='password',placeholder='Enter Your Password')
     auth_message = gr.Textbox(label='Status',interactive=False)
-    chatbot_box = gr.Chatbot(visible=False)
+    chatbot_box = gr.Chatbot(visible=False,type='messages')
     code_text = gr.Textbox(
         label = 'Or Type Code Word Here',
         placeholder = "Type 'chitti' to activate......",
@@ -209,9 +206,9 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
     send_command = gr.Button('Send Command',interactive=False,visible=False)
     password.submit(verify_password,
                     inputs = password,
-                    outputs = [chatbot_box,msg,auth_message,audio,send_audio,code_text])
+                    outputs = [state,chatbot_box,msg,auth_message,audio,send_audio,code_text])
     send_audio.click(model_activation,
-                 inputs = [chatbot_box,state,audio,code_text],
+                 inputs = [state,audio,code_text],
                  outputs = [chatbot_box,audio,state,send_command,send_audio,code_text,command_text])
     send_command.click(command_processing,
                        inputs = [audio,state,command_text],
@@ -221,6 +218,7 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
 port = int(os.environ.get('PORT',7860))
 demo.launch(server_name = '0.0.0.0',
             server_port = port)
+
 
 
 
