@@ -13,7 +13,7 @@ def verify_password(pswd):
     if pswd == PASSWORD:
         return(
             [],
-            [],
+            gr.update(value = [],visible=True),
             gr.update(value = 'Wake Up The Chitti With The Code Word !',visible=True),
             gr.update(value='Access Granted !'),
             gr.update(value=None,visible=True),
@@ -23,7 +23,7 @@ def verify_password(pswd):
     else:
         return(
             [],
-            [],
+            gr.update(value=[],visible=False),
             gr.update(visible=False),
             'Invalid Credentials ! Please Login with correct credentials',
             gr.update(value =None,visible=False),
@@ -100,6 +100,8 @@ def extract_website(sentence):
     return None
 
 def model_activation(history,audio,code_text):
+    if history is None:
+        history = []
     user = None
     if code_text and code_text.strip() != '':
         user = code_text.lower()
@@ -219,6 +221,7 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
 port = int(os.environ.get('PORT',7860))
 demo.launch(server_name = '0.0.0.0',
             server_port = port)
+
 
 
 
