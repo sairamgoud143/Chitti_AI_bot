@@ -108,15 +108,16 @@ def model_activation(history,audio,code_text):
         if user:
             user = user.lower()
     if not user:
-        history.append((None,'Code Word is needed to activate Chitti......'))
+        history.append({'role':'assistant', 'content':'Code word is needed to activate Chitti....'})
         return history,gr.update(value=None),history,gr.update(interactive=False),gr.update(visible=True),gr.update(visible=True),gr.update(visible=False)
     if 'chitti' not in user:
         warning = 'Warning: The Chitti cannot be activated without the Code Word'
-        history.append((None,warning))
+        history.append({"role": "assistant", "content": warning})
         return history,gr.update(value=None),history,gr.update(interactive=False),gr.update(visible=True),gr.update(visible=True),gr.update(visible=False)
     
     response = 'speak.......How can i help you ?'
-    history.append((user,response))
+    history.append({'role':'user','content':user})
+    history.append({'role':'assistant','content':response})
     return history,gr.update(value=None),history.copy(),gr.update(interactive=True),gr.update(visible=False),gr.update(visible=False),gr.update(visible=True)
 
 try:
@@ -142,17 +143,17 @@ def command_processing(audio1,history,command_text):
         intent,command = find_intent(audio1)
     else:
         content = 'Please provide a voice or typed command'
-        history.append((None,content))
+        history.append({'role':'assistant', 'content':'Please provide a voice or typed command'})
         return history,history.copy(),gr.update(visible=False),gr.update(value=None),gr.update(interactive=True),gr.update(),gr.update()
     if intent == 'music':
-        history.append((None,command))
-        history.append((None,'Downloading Video.....Please Wait..'))
+        history.append({'role':'user','content':command})
+        history.append({'role':'assistant','content':'Downloading Video.....Please Wait..'})
         file_path = playing_music_download(command)
         if file_path:
             return history,history.copy(),gr.update(value=file_path,visible=True),gr.update(value=None),gr.update(interactive=True),gr.update(),gr.update()
         else:
             response = 'Download Failed'
-            history.append((None,response))
+            history.append({'role':'assistant','content':response})
             return history,history.copy(),gr.update(visible=False),gr.update(value=None),gr.update(interactive=True),gr.update(),gr.update()
     elif intent == 'news':
         headlines = fetching_news()
@@ -160,7 +161,7 @@ def command_processing(audio1,history,command_text):
             'Chitti: Here is the latest news for you......\n\n'
             + '\n'.join(headlines[:20])
             ) if headlines else 'Chitti: No News Found !'
-        history.append((None,response))
+        history.append({'role':'assistant','content':response})
         return history, history.copy(), gr.update(visible=False),gr.update(value=None),gr.update(interactive=True),gr.update(),gr.update()
     elif intent == 'website':
         site = extract_website(command)
@@ -169,7 +170,8 @@ def command_processing(audio1,history,command_text):
             response = f'Chitti: Just wait, i will open the {site} for you.....click this link {link}...'
         else:
             response = 'Chitti: Sorry, i could not understand this.....'
-    history.append((command,'Downloading Video.....Please wait...'))
+    history.append({'role':'user','content':command})
+    history.append({'role':'assistant','content':response})
     return history,history.copy(),gr.update(visible=False),gr.update(value=None),gr.update(interactive=True),gr.update(visible=False),gr.update(visible=False)
 
 with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
@@ -217,6 +219,7 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
 port = int(os.environ.get('PORT',7860))
 demo.launch(server_name = '0.0.0.0',
             server_port = port)
+
 
 
 
