@@ -13,8 +13,8 @@ def verify_password(pswd):
     if pswd == PASSWORD:
         return(
             [],
-            gr.update(visible=True),
-            'Access Granted !',
+            gr.update(value = 'Wake Up The Chitti With The Code Word !',visible=True),
+            gr.update(value='Access Granted !'),
             gr.update(value=None,visible=True),
             gr.update(visible=True),
             gr.update(visible=True),
@@ -24,7 +24,7 @@ def verify_password(pswd):
             [],
             gr.update(visible=False),
             'Invalid Credentials ! Please Login with correct credentials',
-            gr.update(value =None,visible=True),
+            gr.update(value =None,visible=False),
             gr.update(visible=False),
             gr.update(visible=False),
         )
@@ -221,6 +221,7 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
 port = int(os.environ.get('PORT',7860))
 demo.launch(server_name = '0.0.0.0',
             server_port = port)
+
 
 
 
