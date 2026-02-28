@@ -31,32 +31,20 @@ def verify_password(pswd):
             gr.update(visible=False),
         )
 
-def playing_music_download(song_name,progress=gr.Progress()):
-    def progress_hook(d):
-        if d['status'] == 'downloading':
-            percent = d.get('_percent_str','0%')
-            progress(percent.strip())
+def get_youtube(song_name):
     options = {
-        'format':'best[ext=mp4]/best',
         'quiet':True,
         'default_search':'ytsearch1',
-        'outtmpl': '%(title)s.%(ext)s',
-        'noplaylist':True,
-        'progress_hooks':[progress_hook],
+        'noplaylist':True
     }
-    
-    try:
-        with yt_dlp.YoutubeDL(options) as ydl:
-            info = ydl.extract_info(song_name,download=True)
-            entry = info['entries'][0] if 'entries' in info else info
-            filename = ydl.prepare_filename(entry)
-            title = entry['title']  
+    with yt_dlp.YoutubeDL(options) as ydl:
+        info = ydl.extract_info(song_name,download=True)
+        entry = info['entries'][0] if 'entries' in info else info
+        return entry ['webpage_url']
         
-        return filename
-
-    except Exception as e:
-        print('Error:',e)
-        return None
+def extract_id(url):
+    match = re.search(r'(?:v=|youtu\.be/)([^&]+)', url)
+    return match.group(1) if match else None
   
 def fetching_news():
     api_key = '904716fee400b0ccd9210e82f10353fb'
@@ -150,13 +138,23 @@ def command_processing(audio1,history,command_text):
     if intent == 'music':
         history.append({'role':'user','content':command})
         history.append({'role':'assistant','content':'Downloading Video.....Please Wait..'})
-        file_path = playing_music_download(command)
-        if file_path:
-            return history,history.copy(),gr.update(value=file_path,visible=True),gr.update(value=None),gr.update(interactive=True),gr.update(),gr.update()
-        else:
-            response = 'Download Failed'
-            history.append({'role':'assistant','content':response})
+        try:
+            url = get_youtube(command)
+            id = extract_id(url)
+            embed_html = f"""
+        <iframe width="100%" height="400"
+        src="https://www.youtube.com/embed/{video_id}?autoplay=1"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+        </iframe>
+        """
+            history.append({'role':'assistant','content':'Playing Your Song Below.....'})
+            return history,history.copy(),gr.update(value=embed_html,visible=True),gr.update(value=None),gr.update(interactive=True),gr.update(),gr.update()
+        except Exception as e:
+            history.append({'role':'assistant','content':f'Error fetching video: {str(e)}'})
             return history,history.copy(),gr.update(visible=False),gr.update(value=None),gr.update(interactive=True),gr.update(),gr.update()
+        
     elif intent == 'news':
         headlines = fetching_news()
         response = (
@@ -196,7 +194,7 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
         placeholder = 'Type your command',
         visible = False
     )
-    video_player = gr.Video(label= 'Now Playing.....',visible=False)
+    video_player = gr.HTML(visible=False)
     msg = gr.Textbox('Wake Up The Chitti with the Code Word !',visible=False)
     progress_box = gr.Textbox(
         label = 'Download Status',
@@ -221,6 +219,7 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
 port = int(os.environ.get('PORT',7860))
 demo.launch(server_name = '0.0.0.0',
             server_port = port)
+
 
 
 
