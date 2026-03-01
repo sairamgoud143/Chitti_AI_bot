@@ -39,7 +39,7 @@ def get_youtube(query):
         'q':query,
         'key':youtube_api,
         'maxResults':1,
-        'type':'video
+        'type':'video'
     }
     response = requests.get(search_url,params=params)
     data = response.json()
@@ -220,6 +220,7 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
 port = int(os.environ.get('PORT',7860))
 demo.launch(server_name = '0.0.0.0',
             server_port = port)
+
 
 
 
