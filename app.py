@@ -44,7 +44,7 @@ def get_youtube(query):
     response = requests.get(search_url,params=params)
     data = response.json()
     if 'items' in data and len(data['items'])>0:
-        return data['items][0]['id']['videoId']
+        return data['items'][0]['id']['videoId']
   
 def fetching_news():
     api_key = '904716fee400b0ccd9210e82f10353fb'
@@ -220,6 +220,7 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
 port = int(os.environ.get('PORT',7860))
 demo.launch(server_name = '0.0.0.0',
             server_port = port)
+
 
 
 
