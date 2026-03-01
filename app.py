@@ -1,12 +1,13 @@
 import speech_recognition as sr
 import webbrowser as op
 import requests
-import yt_dlp
 import time
 import joblib
 import re
 import gradio as gr
 import os
+
+youtube_api = 'AIzaSyBKww8V9M7FY8MPk9X_94BS0A21bim1Sbs'
 
 PASSWORD = 'Sairam@970#'
 def verify_password(pswd):
@@ -31,9 +32,19 @@ def verify_password(pswd):
             gr.update(visible=False),
         )
 
-def get_youtube(song_name):
-    query = song_name.replace(' ','+')
-    return f"https://www.youtube.com/results?search_query={query}"
+def get_youtube(query):
+    search_url = "https://www.googleapis.com/youtube/v3/search"
+    params = {
+        'part':'snippet',
+        'q':query,
+        'key':youtube_api,
+        'maxResults':1,
+        'type':'video
+    }
+    response = requests.get(search_url,params=params)
+    data = response.json()
+    if 'items' in data and len(data['items'])>0:
+        return data['items][0]['id']['videoId']
   
 def fetching_news():
     api_key = '904716fee400b0ccd9210e82f10353fb'
@@ -126,13 +137,17 @@ def command_processing(audio1,history,command_text):
         return history,history.copy(),gr.update(visible=False),gr.update(value=None),gr.update(interactive=True),gr.update(),gr.update()
     if intent == 'music':
         history.append({'role':'user','content':command})
-        history.append({'role':'assistant','content':'Downloading Video.....Please Wait..'})
+        history.append({'role':'assistant','content':'Searching your song.....Please Wait..'})
         try:
-            search_url = get_youtube(command)
+            video_id = get_youtube(command)
+            if not video_id:
+                raise Exception('No Video Found')
             embed_html = f"""
-            <iframe width="100%" height="500"
-            src="{search_url}"
-            frameborder="0">
+            <iframe width="100%" height="400"
+            src="https://www.youtube.com/embed/{video_id}?autoplay=1"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen>
             </iframe>
             """
             history.append({'role':'assistant','content':'Playing Your Song Below.....'})
@@ -205,6 +220,7 @@ with gr.Blocks(theme = gr.themes.Monochrome()) as demo:
 port = int(os.environ.get('PORT',7860))
 demo.launch(server_name = '0.0.0.0',
             server_port = port)
+
 
 
 
